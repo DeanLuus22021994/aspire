@@ -161,7 +161,7 @@ tools/ReleaseNotes/release-notes-*.md
 
 # Environment configuration files with secrets
 .devcontainer/.env
-.devcontainer/.env.local
+.devcontainer/devcontainer.env
 .devcontainer/*.env
 !.devcontainer/.env.example
 

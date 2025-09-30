@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                ".devcontainer/setup-env.sh"
+                ".devcontainer/scripts/setup-env.sh"
             ],
             "group": {
                 "kind": "build",
@@ -31,7 +31,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "if [ ! -f .devcontainer/.env ]; then cp .devcontainer/.env.example .devcontainer/.env && chmod 600 .devcontainer/.env && echo 'Copied .devcontainer/.env.example -> .devcontainer/.env. Edit values then re-run this task.' && exit 1; fi; .devcontainer/setup-env.sh --from-file .devcontainer/.env"
+                "if [ ! -f .devcontainer/.env ]; then cp .devcontainer/.env.example .devcontainer/.env && chmod 600 .devcontainer/.env && echo 'Copied .devcontainer/.env.example -> .devcontainer/.env. Edit values then re-run this task.' && exit 1; fi; .devcontainer/scripts/setup-env.sh --from-file .devcontainer/.env"
             ],
             "group": {
                 "kind": "build",
@@ -55,7 +55,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                ".devcontainer/verify-env.sh"
+                ".devcontainer/scripts/verify-env.sh"
             ],
             "group": "test",
             "presentation": {
@@ -198,6 +198,30 @@
             },
             "problemMatcher": [],
             "detail": "Create a template .env file for secure configuration"
+        },
+        {
+            "label": "DevContainer Quick Start Guide",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                ".devcontainer/scripts/quick-start.sh"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Show quick start guide for new developers"
         }
     ]
 }
