@@ -1,0 +1,203 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Setup Environment Variables",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                ".devcontainer/setup-env.sh"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Interactive setup for GitHub Actions runner environment variables"
+        },
+        {
+            "label": "Setup Environment (Non-Interactive)",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "if [ ! -f .devcontainer/.env ]; then cp .devcontainer/.env.example .devcontainer/.env && chmod 600 .devcontainer/.env && echo 'Copied .devcontainer/.env.example -> .devcontainer/.env. Edit values then re-run this task.' && exit 1; fi; .devcontainer/setup-env.sh --from-file .devcontainer/.env"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Non-interactive setup using .devcontainer/.env (copy example to .env if missing)"
+        },
+        {
+            "label": "Verify Environment Variables",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                ".devcontainer/verify-env.sh"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Non-destructive verification of environment variables and authentication"
+        },
+        {
+            "label": "Load Environment Variables",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "if [ -f .devcontainer/.env ]; then set -a; source .devcontainer/.env; set +a; echo 'Environment variables loaded from .devcontainer/.env'; env | grep -E '^(GH_PAT|GITHUB_OWNER|GITHUB_RUNNER_TOKEN|DOCKER_ACCESS_TOKEN|DOCKER_USERNAME)=' | sed 's/=.*$/=<SET>/'; else echo 'No .env file found'; fi"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Load and display environment variables from .env file"
+        },
+        {
+            "label": "Aspire: Restore & Build",
+            "type": "shell",
+            "command": "./build.sh",
+            "args": [
+                "--build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "detail": "Build Aspire project using the build script"
+        },
+        {
+            "label": "Aspire: Full Restore",
+            "type": "shell",
+            "command": "./restore.sh",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Run Aspire restore script to setup local SDK"
+        },
+        {
+            "label": "Setup Complete Environment",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Setup Environment Variables",
+                "Verify Environment Variables"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "detail": "Complete setup: environment variables + verification"
+        },
+        {
+            "label": "Clean Environment Variables",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo 'Cleaning environment variables...'; if ls ~/.bashrc.backup.* 1>/dev/null 2>&1; then latest_backup=$(ls -t ~/.bashrc.backup.* | head -1); echo \"Restoring from $latest_backup\"; cp \"$latest_backup\" ~/.bashrc; fi; rm -f .devcontainer/.env; unset GH_PAT GITHUB_OWNER GITHUB_RUNNER_TOKEN DOCKER_ACCESS_TOKEN DOCKER_USERNAME; echo 'Environment cleaned and .bashrc restored'"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Remove .env file and restore .bashrc from backup"
+        },
+        {
+            "label": "Create Secure .env Template",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "cat > .devcontainer/.env.example << 'EOF'\n# GitHub Actions Runner Environment Variables\n# Copy this file to .devcontainer/.env and fill in your values\n# DO NOT commit .env file to version control\n\n# GitHub Personal Access Token with repo and workflow scopes\nGH_PAT=\n\n# GitHub username or organization name\nGITHUB_OWNER=\n\n# GitHub Actions runner registration token (expires after 1 hour)\nGITHUB_RUNNER_TOKEN=\n\n# Docker Hub access token\nDOCKER_ACCESS_TOKEN=\n\n# Docker Hub username\nDOCKER_USERNAME=\nEOF && echo 'Created .devcontainer/.env.example template' && echo 'Copy to .devcontainer/.env and add your values'"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Create a template .env file for secure configuration"
+        }
+    ]
+}

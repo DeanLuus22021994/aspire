@@ -158,3 +158,13 @@ playground/**/publish/
 # Release notes automation output
 tools/ReleaseNotes/analysis-output/
 tools/ReleaseNotes/release-notes-*.md
+
+# Environment configuration files with secrets
+.devcontainer/.env
+.devcontainer/.env.local
+.devcontainer/*.env
+!.devcontainer/.env.example
+
+# Backup files that might contain secrets
+*.bak
+*~
