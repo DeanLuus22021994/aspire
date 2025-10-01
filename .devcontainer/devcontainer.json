@@ -117,15 +117,16 @@
             ]
         }
     },
-    // CRITICAL FIX: Use ./restore.sh instead of dotnet restore
+    // CRITICAL FIX: Make root-level scripts executable FIRST, then run restore.sh
     // The Aspire repo requires running restore.sh first to set up the local SDK
-    "onCreateCommand": "bash -c 'chmod +x .devcontainer/scripts/*.sh .devcontainer/scripts/lib/*.sh 2>/dev/null || true && ./restore.sh'",
+    // Must chmod *.sh to include restore.sh, build.sh, etc. in the workspace root
+    "onCreateCommand": "chmod +x *.sh .devcontainer/scripts/*.sh .devcontainer/scripts/lib/*.sh 2>/dev/null || true && bash ./restore.sh",
     
     // Make init-env.sh non-blocking - it should not fail container creation
-    "postCreateCommand": "bash -c 'if [ -f .devcontainer/scripts/init-env.sh ]; then bash .devcontainer/scripts/init-env.sh || true; fi'",
+    "postCreateCommand": "if [ -f .devcontainer/scripts/init-env.sh ]; then bash .devcontainer/scripts/init-env.sh || true; fi",
     
-    // Use the local SDK after restore has completed
-    "postStartCommand": "bash -lc 'if command -v dotnet >/dev/null 2>&1; then echo \"Running dotnet dev-certs\" && dotnet dev-certs https --trust 2>/dev/null || echo \"dotnet dev-certs skipped (requires interactive mode)\"; else echo \"dotnet not found, skipping dev-certs\"; fi'",
+    // Only run dev-certs if the local SDK is ready (checks for 10.0 SDK)
+    "postStartCommand": "bash -lc 'if command -v dotnet >/dev/null 2>&1 && dotnet --list-sdks 2>/dev/null | grep -q \"10.0\"; then echo \"Running dotnet dev-certs\" && dotnet dev-certs https --trust 2>/dev/null || echo \"dotnet dev-certs failed or returned non-zero\"; else echo \"Local SDK not ready, skipping dev-certs\"; fi'",
     
     "remoteEnv": {
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
@@ -135,6 +136,7 @@
         "DOTNET_ROOT": "/usr/share/dotnet",
         "PATH": "${containerEnv:PATH}:/workspaces/aspire/.dotnet:/workspaces/aspire/artifacts/bin/Aspire.Cli/Release/net10.0/linux-x64/publish"
     },
+    "remoteUser": "vscode",
     "runArgs": [
         "--cap-add=SYS_PTRACE",
         "--security-opt",
