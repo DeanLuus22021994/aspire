@@ -84,13 +84,14 @@ echo "2. Remove unused images (reclaimable: ${reclaimable_images})"
 echo "3. Remove build cache (${reclaimable_cache})"
 echo "4. Remove dangling volumes (${unused_volumes} volumes)"
 echo "5. Clean old devcontainer images (keep current only)"
-echo "6. Full cleanup (all of the above - AGGRESSIVE)"
-echo "7. Prune with confirmation (safer)"
-echo "8. Show detailed breakdown"
-echo "9. Exit"
+echo "6. Clean Python cache volumes"
+echo "7. Full cleanup (all of the above - AGGRESSIVE)"
+echo "8. Prune with confirmation (safer)"
+echo "9. Show detailed breakdown"
+echo "10. Exit"
 echo ""
 
-read -p "Select option (1-9): " choice
+read -p "Select option (1-10): " choice
 
 case $choice in
     1)
@@ -152,6 +153,50 @@ case $choice in
         ;;
 
     6)
+        print_header "Cleaning Python Cache Volumes"
+        echo ""
+
+        # Show Python cache volumes
+        print_info "Python cache volumes:"
+        docker volume ls | grep -E "(python-binaries-cache|python-tools-cache)" || print_warning "No Python cache volumes found"
+
+        echo ""
+
+        # Get sizes
+        if docker volume inspect python-binaries-cache >/dev/null 2>&1; then
+            binaries_size=$(docker run --rm -v python-binaries-cache:/cache alpine du -sh /cache 2>/dev/null | cut -f1 || echo "unknown")
+            print_info "Python binaries cache: $binaries_size"
+        fi
+
+        if docker volume inspect python-tools-cache >/dev/null 2>&1; then
+            tools_size=$(docker run --rm -v python-tools-cache:/cache alpine du -sh /cache 2>/dev/null | cut -f1 || echo "unknown")
+            print_info "Python tools cache: $tools_size"
+        fi
+
+        echo ""
+        print_warning "Removing Python cache will cause next build to recompile Python from source (~4 min)"
+        read -p "Remove Python cache volumes? (yes/no): " confirm
+
+        if [ "$confirm" = "yes" ]; then
+            # Stop any containers using these volumes
+            containers=$(docker ps -aq --filter "volume=python-binaries-cache" --filter "volume=python-tools-cache")
+            if [ -n "$containers" ]; then
+                print_warning "Stopping containers using Python cache volumes..."
+                echo "$containers" | xargs -r docker stop
+            fi
+
+            # Remove volumes
+            docker volume rm python-binaries-cache 2>/dev/null && print_success "Removed python-binaries-cache" || print_info "python-binaries-cache not found"
+            docker volume rm python-tools-cache 2>/dev/null && print_success "Removed python-tools-cache" || print_info "python-tools-cache not found"
+
+            print_success "Python cache cleared"
+            print_info "Next container rebuild will repopulate the cache"
+        else
+            print_info "Python cache cleanup cancelled"
+        fi
+        ;;
+
+    7)
         print_header "Full Cleanup (AGGRESSIVE)"
         print_warning "This will remove:"
         echo "  • All stopped containers"
@@ -192,13 +237,13 @@ case $choice in
         fi
         ;;
 
-    7)
+    8)
         print_header "Pruning with Confirmation"
         docker system prune --volumes
         print_success "Prune complete"
         ;;
 
-    8)
+    9)
         print_header "Detailed Breakdown"
         echo ""
 
@@ -218,7 +263,7 @@ case $choice in
         docker buildx du
         ;;
 
-    9)
+    10)
         print_info "Exiting without changes"
         exit 0
         ;;

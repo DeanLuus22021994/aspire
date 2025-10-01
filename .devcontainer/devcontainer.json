@@ -96,7 +96,7 @@
             }
         }
     },
-    "onCreateCommand": "chmod +x *.sh .devcontainer/scripts/**/*.sh eng/*.sh eng/**/*.sh 2>/dev/null || true && chown -R vscode:vscode /workspaces/aspire 2>/dev/null || true && bash .devcontainer/scripts/lifecycle/init-cache.sh && bash ./restore.sh && bash .devcontainer/scripts/lifecycle/init-env.sh || true",
+    "onCreateCommand": "chown -R vscode:vscode /workspaces/aspire 2>/dev/null || true && sleep 2 && chmod +x *.sh .devcontainer/scripts/**/*.sh eng/*.sh eng/**/*.sh 2>/dev/null || true && bash .devcontainer/scripts/lifecycle/init-python-cache.sh && bash .devcontainer/scripts/lifecycle/init-cache.sh && bash ./restore.sh && bash .devcontainer/scripts/lifecycle/init-env.sh || true",
     "postCreateCommand": "bash .devcontainer/scripts/lifecycle/post-create-validation.sh || true",
     "postStartCommand": "bash -lc 'if command -v dotnet >/dev/null 2>&1 && dotnet --list-sdks 2>/dev/null | grep -q \"10.0\"; then dotnet dev-certs https --trust 2>/dev/null || echo \"dev-certs skipped\"; fi'",
     "remoteEnv": {
@@ -107,13 +107,19 @@
         "DOTNET_ROOT": "/opt/dotnet-sdk",
         "NUGET_PACKAGES": "/workspace-cache/nuget",
         "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
-        "DOTNET_SKIP_FIRST_TIME_EXPERIENCE": "1"
+        "DOTNET_SKIP_FIRST_TIME_EXPERIENCE": "1",
+        "PYTHON_CACHE_DIR": "/usr/local/python-cache",
+        "MAKEFLAGS": "-j$(nproc)",
+        "CFLAGS": "-O3 -march=native",
+        "CXXFLAGS": "-O3 -march=native"
     },
     "remoteUser": "vscode",
     "mounts": [
         "source=aspire-nuget-cache,target=/workspace-cache/nuget,type=volume",
         "source=aspire-build-cache,target=/workspace-cache/artifacts,type=volume",
         "source=aspire-dotnet-cache,target=/workspace-cache/.dotnet,type=volume",
+        "source=python-binaries-cache,target=/usr/local/python-cache,type=volume",
+        "source=python-tools-cache,target=/usr/local/py-utils-cache,type=volume",
         "source=${localWorkspaceFolder}/.devcontainer/.env,target=/workspace/.env,type=bind,consistency=cached"
     ],
     "runArgs": [
