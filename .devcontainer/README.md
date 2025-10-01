@@ -21,7 +21,7 @@ code .
 
 ## 📁 Structure
 
-```
+```text
 .devcontainer/
 ├── Dockerfile                    # Multi-stage build with pre-installed SDK
 ├── devcontainer.json             # Container configuration
@@ -220,7 +220,7 @@ bash .devcontainer/scripts/container/rebuild.sh
 
 ## 🔄 Automated Setup Flow
 
-```
+```flow
 1. Docker Build (SDK pre-installed)
    ↓
 2. Feature Installation (Azure CLI, Docker, GitHub CLI, etc.)
@@ -252,5 +252,5 @@ bash .devcontainer/scripts/container/rebuild.sh
 
 ---
 
-**Version:** 2.0 (Optimized & Reorganized)  
+**Version:** 2.0 (Optimized & Reorganized)
 **Last Updated:** October 1, 2025
