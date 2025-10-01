@@ -222,6 +222,141 @@
             },
             "problemMatcher": [],
             "detail": "Show quick start guide for new developers"
+        },
+        {
+            "label": "DevContainer: Build and Run with Logs",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo '=== Building DevContainer ===' && devcontainer build --workspace-folder . --log-level trace 2>&1 | tee /tmp/devcontainer-build.log && echo '' && echo '=== Build Complete ===' && echo '' && echo '=== Starting DevContainer ===' && devcontainer up --workspace-folder . --log-level trace 2>&1 | tee /tmp/devcontainer-up.log && echo '' && echo '=== Container Started ===' && echo '' && echo '=== Inspecting Logs ===' && echo '' && echo 'Build log: /tmp/devcontainer-build.log' && echo 'Startup log: /tmp/devcontainer-up.log' && echo '' && echo 'Showing last 50 lines of build log:' && tail -n 50 /tmp/devcontainer-build.log && echo '' && echo 'Showing last 50 lines of startup log:' && tail -n 50 /tmp/devcontainer-up.log"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Build and start devcontainer using CLI with full logging and inspection"
+        },
+        {
+            "label": "DevContainer: Rebuild",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo '=== Rebuilding DevContainer (No Cache) ===' && devcontainer build --workspace-folder . --no-cache --log-level trace 2>&1 | tee /tmp/devcontainer-rebuild.log && echo '' && echo '=== Rebuild Complete ===' && echo 'Log saved to: /tmp/devcontainer-rebuild.log' && echo '' && echo 'Showing last 100 lines:' && tail -n 100 /tmp/devcontainer-rebuild.log"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Rebuild devcontainer from scratch without cache, with full logging"
+        },
+        {
+            "label": "DevContainer: Show Logs",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo '=== DevContainer Logs ===' && echo '' && if [ -f /tmp/devcontainer-build.log ]; then echo '--- Build Log (last 50 lines) ---' && tail -n 50 /tmp/devcontainer-build.log && echo ''; fi && if [ -f /tmp/devcontainer-up.log ]; then echo '--- Startup Log (last 50 lines) ---' && tail -n 50 /tmp/devcontainer-up.log && echo ''; fi && if [ -f /tmp/devcontainer-rebuild.log ]; then echo '--- Rebuild Log (last 50 lines) ---' && tail -n 50 /tmp/devcontainer-rebuild.log && echo ''; fi && echo '=== Full logs available at ===' && echo 'Build: /tmp/devcontainer-build.log' && echo 'Startup: /tmp/devcontainer-up.log' && echo 'Rebuild: /tmp/devcontainer-rebuild.log' && echo '' && echo 'To view full logs, run: cat /tmp/devcontainer-*.log'"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Display saved devcontainer build and startup logs"
+        },
+        {
+            "label": "DevContainer: Exec Command",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "read -p 'Enter command to execute in container: ' cmd && devcontainer exec --workspace-folder . bash -c \"$cmd\" 2>&1 | tee /tmp/devcontainer-exec.log && echo '' && echo 'Command output saved to: /tmp/devcontainer-exec.log'"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Execute a command inside the running devcontainer and capture output"
+        },
+        {
+            "label": "DevContainer: Validate Configuration",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo '=== Validating DevContainer Configuration ===' && echo '' && echo 'Checking devcontainer.json syntax...' && if jq empty .devcontainer/devcontainer.json 2>/dev/null; then echo '✓ devcontainer.json is valid JSON'; else echo '✗ devcontainer.json has syntax errors'; jq . .devcontainer/devcontainer.json; exit 1; fi && echo '' && echo 'Checking Dockerfile...' && if [ -f .devcontainer/Dockerfile ]; then echo '✓ Dockerfile exists'; docker build -f .devcontainer/Dockerfile --no-cache --progress=plain . 2>&1 | head -n 20; else echo '✗ Dockerfile not found'; exit 1; fi && echo '' && echo '=== Configuration appears valid ===' && echo 'Run \"DevContainer: Build and Run with Logs\" to test'"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Validate devcontainer.json syntax and Dockerfile before building"
+        },
+        {
+            "label": "DevContainer: Inspect Current Container",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo '=== Current DevContainer Information ===' && echo '' && container_id=$(docker ps --filter label=devcontainer.local_folder --format '{{.ID}}' | head -n 1) && if [ -z \"$container_id\" ]; then echo 'No running devcontainer found'; echo 'Run \"DevContainer: Build and Run with Logs\" first'; exit 1; fi && echo \"Container ID: $container_id\" && echo '' && echo '--- Container Status ---' && docker ps --filter id=$container_id --format 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}' && echo '' && echo '--- Container Logs (last 50 lines) ---' && docker logs --tail 50 $container_id && echo '' && echo '--- Container Inspect ---' && docker inspect $container_id | jq '.[] | {Name, State, Config: {Image, Cmd, Env}}'"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Inspect the currently running devcontainer (status, logs, configuration)"
         }
     ]
 }
