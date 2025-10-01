@@ -47,6 +47,18 @@ ensure_permissions() {
         "${workspace}/.dotnet"
     )
 
+    # Fix permissions on scripts that need to be executable
+    local critical_scripts=(
+        "${workspace}/eng/common/dotnet-install.sh"
+        "${workspace}/eng/common/tools.sh"
+    )
+
+    for script in "${critical_scripts[@]}"; do
+        if [ -f "$script" ]; then
+            chmod +x "$script" 2>/dev/null || true
+        fi
+    done
+
     for dir in "${critical_dirs[@]}"; do
         if ! _wait_for_write_access "$dir" "$max_wait"; then
             echo -e "${RED}✗ Timeout waiting for write access: ${dir}${NC}" >&2
