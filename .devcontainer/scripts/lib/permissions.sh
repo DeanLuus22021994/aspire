@@ -66,9 +66,15 @@ ensure_permissions() {
 _fix_permissions() {
     local path="$1"
 
-    # Try to change ownership
+    # Try to change ownership (works on native Linux, fails on WSL2 mounts)
     if chown -R vscode:vscode "$path" 2>/dev/null; then
         echo -e "${GREEN}✓ Changed ownership: ${path}${NC}"
+        return 0
+    fi
+
+    # Fallback: make writable by all (works on WSL2 mounts)
+    if chmod -R a+w "$path" 2>/dev/null; then
+        echo -e "${GREEN}✓ Made writable: ${path}${NC}"
         return 0
     fi
 
@@ -88,7 +94,8 @@ _wait_for_write_access() {
     # Create directory if it doesn't exist
     mkdir -p "$dir" 2>/dev/null || true
 
-    while [ ! -w "$dir" ]; do
+    # Check if vscode user can write (not just current user)
+    while ! sudo -u vscode test -w "$dir" 2>/dev/null; do
         if [ $wait_count -ge "$max_wait" ]; then
             echo -e "${YELLOW}⚠ Timeout after ${max_wait}s waiting for: ${dir}${NC}" >&2
             return 1
@@ -98,7 +105,7 @@ _wait_for_write_access() {
         wait_count=$((wait_count + DEFAULT_CHECK_INTERVAL))
 
         # Try to fix permissions again
-        _fix_permissions "$(dirname "$dir")" 2>/dev/null || true
+        _fix_permissions "$dir" 2>/dev/null || true
     done
 
     echo -e "${GREEN}✓ Write access verified: ${dir}${NC}"
