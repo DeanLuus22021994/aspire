@@ -1,34 +1,147 @@
 {
-	"name": ".NET Aspire - Dogfood (Nightly)",
-	"build": {
-		"dockerfile": "./Dockerfile"
-	},
-	"features": {
-		"ghcr.io/devcontainers/features/azure-cli:1": {},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-		"ghcr.io/devcontainers/features/powershell:1": {},
-		"ghcr.io/azure/azure-dev/azd:0": {}
-	},
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"ms-dotnettools.csdevkit",
-				"ms-azuretools.vscode-bicep",
-				"GitHub.copilot-chat",
-				"GitHub.copilot",
-        		"microsoft-aspire.aspire-vscode"
-      ],
-			"settings": {
-				"remote.autoForwardPorts": true,
-				"remote.autoForwardPortsSource": "hybrid",
-				"remote.otherPortsAttributes": {
-					"onAutoForward": "ignore"
-				}
-			}
-		}
-	},
-	"workspaceFolder": "/workspaces/dogfood",  // Empty directory for clean testing
-	"onCreateCommand": "sudo chown -R vscode:vscode /workspaces/dogfood && dotnet new install Aspire.ProjectTemplates::*-*",
-	"postStartCommand": "dotnet dev-certs https --trust",
-	"forwardPorts": []
+    "name": ".NET Aspire - Contribute",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/azure-cli:1": {},
+        "ghcr.io/azure/azure-dev/azd:0": {},
+        "ghcr.io/devcontainers/features/docker-in-docker": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/dotnet": {
+            "version": "10.0",
+            "installUsingApt": false
+        },
+        "ghcr.io/devcontainers/features/node:1": {},
+        "ghcr.io/devcontainers/features/python:1": {},
+        "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+            "version": "latest",
+            "helm": "latest",
+            "minikube": "none"
+        }
+    },
+    "hostRequirements": {
+        "cpus": 8,
+        "memory": "32gb",
+        "storage": "64gb",
+        "gpu": "optional"
+    },
+    "forwardPorts": [
+        8080,
+        8443,
+        5000,
+        5001,
+        18888,
+        4317,
+        4318,
+        9090,
+        3000,
+        3001,
+        7777,
+        8000,
+        8888,
+        9000,
+        9001
+    ],
+    "portsAttributes": {
+        "8080": {
+            "label": "Aspire Dashboard (HTTP)",
+            "onAutoForward": "notify"
+        },
+        "8443": {
+            "label": "Aspire Dashboard (HTTPS)",
+            "onAutoForward": "notify"
+        },
+        "5000": {
+            "label": "App HTTP",
+            "onAutoForward": "silent"
+        },
+        "5001": {
+            "label": "App HTTPS",
+            "onAutoForward": "silent"
+        },
+        "18888": {
+            "label": "Aspire Dashboard (Alternative)",
+            "onAutoForward": "notify"
+        },
+        "4317": {
+            "label": "OTLP gRPC",
+            "onAutoForward": "ignore"
+        },
+        "4318": {
+            "label": "OTLP HTTP",
+            "onAutoForward": "ignore"
+        },
+        "9090": {
+            "label": "Prometheus",
+            "onAutoForward": "ignore"
+        },
+        "3000": {
+            "label": "Frontend Dev Server",
+            "onAutoForward": "silent"
+        },
+        "3001": {
+            "label": "Frontend Dev Server (Alt)",
+            "onAutoForward": "silent"
+        },
+        "7777": {
+            "label": "Test Server",
+            "onAutoForward": "silent"
+        },
+        "8000": {
+            "label": "Python/API Server",
+            "onAutoForward": "silent"
+        },
+        "8888": {
+            "label": "Jupyter/Notebook",
+            "onAutoForward": "ignore"
+        },
+        "9000": {
+            "label": "Additional Service",
+            "onAutoForward": "silent"
+        },
+        "9001": {
+            "label": "Additional Service (Alt)",
+            "onAutoForward": "silent"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csdevkit",
+                "ms-azuretools.vscode-docker",
+                "GitHub.copilot-chat",
+                "GitHub.copilot",
+                "redhat.vscode-yaml",
+                "eamodio.gitlens"
+            ]
+        }
+    },
+    // CRITICAL FIX: Use ./restore.sh instead of dotnet restore
+    // The Aspire repo requires running restore.sh first to set up the local SDK
+    "onCreateCommand": "bash -c 'chmod +x .devcontainer/scripts/*.sh .devcontainer/scripts/lib/*.sh 2>/dev/null || true && ./restore.sh'",
+    
+    // Make init-env.sh non-blocking - it should not fail container creation
+    "postCreateCommand": "bash -c 'if [ -f .devcontainer/scripts/init-env.sh ]; then bash .devcontainer/scripts/init-env.sh || true; fi'",
+    
+    // Use the local SDK after restore has completed
+    "postStartCommand": "bash -lc 'if command -v dotnet >/dev/null 2>&1; then echo \"Running dotnet dev-certs\" && dotnet dev-certs https --trust 2>/dev/null || echo \"dotnet dev-certs skipped (requires interactive mode)\"; else echo \"dotnet not found, skipping dev-certs\"; fi'",
+    
+    "remoteEnv": {
+        "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
+        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:4317",
+        "DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS": "true",
+        // Add paths to use local SDK after restore
+        "DOTNET_ROOT": "/usr/share/dotnet",
+        "PATH": "${containerEnv:PATH}:/workspaces/aspire/.dotnet:/workspaces/aspire/artifacts/bin/Aspire.Cli/Release/net10.0/linux-x64/publish"
+    },
+    "runArgs": [
+        "--cap-add=SYS_PTRACE",
+        "--security-opt",
+        "seccomp=unconfined"
+    ],
+    "mounts": [
+        // Mount .env as writable to allow permission changes
+        "source=${localWorkspaceFolder}/.devcontainer/.env,target=/workspaces/aspire/.devcontainer/.env,type=bind,consistency=cached"
+    ]
 }

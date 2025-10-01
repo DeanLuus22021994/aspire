@@ -1,25 +1,23 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
     "name": ".NET Aspire - Contribute",
-    // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
     "features": {
         "ghcr.io/devcontainers/features/azure-cli:1": {},
         "ghcr.io/azure/azure-dev/azd:0": {},
         "ghcr.io/devcontainers/features/docker-in-docker": {},
         "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers/features/dotnet": {
-            "additionalVersions": [
-                "8.0.403",
-                "9.0"
-            ]
+            "version": "10.0",
+            "installUsingApt": false
         },
         "ghcr.io/devcontainers/features/node:1": {},
         "ghcr.io/devcontainers/features/python:1": {},
         "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
             "version": "latest",
             "helm": "latest",
-            "minikube": "latest"
+            "minikube": "none"
         }
     },
     "hostRequirements": {
@@ -47,11 +45,11 @@
     ],
     "portsAttributes": {
         "8080": {
-            "label": "Aspire Dashboard HTTP",
+            "label": "Aspire Dashboard (HTTP)",
             "onAutoForward": "notify"
         },
         "8443": {
-            "label": "Aspire Dashboard HTTPS",
+            "label": "Aspire Dashboard (HTTPS)",
             "onAutoForward": "notify"
         },
         "5000": {
@@ -63,7 +61,7 @@
             "onAutoForward": "silent"
         },
         "18888": {
-            "label": "Aspire Dashboard",
+            "label": "Aspire Dashboard (Alternative)",
             "onAutoForward": "notify"
         },
         "4317": {
@@ -79,19 +77,19 @@
             "onAutoForward": "ignore"
         },
         "3000": {
-            "label": "Web App",
+            "label": "Frontend Dev Server",
             "onAutoForward": "silent"
         },
         "3001": {
-            "label": "Web App Alt",
+            "label": "Frontend Dev Server (Alt)",
             "onAutoForward": "silent"
         },
         "7777": {
-            "label": "API Service",
+            "label": "Test Server",
             "onAutoForward": "silent"
         },
         "8000": {
-            "label": "Service",
+            "label": "Python/API Server",
             "onAutoForward": "silent"
         },
         "8888": {
@@ -103,7 +101,7 @@
             "onAutoForward": "silent"
         },
         "9001": {
-            "label": "Additional Service Alt",
+            "label": "Additional Service (Alt)",
             "onAutoForward": "silent"
         }
     },
@@ -111,47 +109,39 @@
         "vscode": {
             "extensions": [
                 "ms-dotnettools.csdevkit",
-                "ms-azuretools.vscode-bicep",
-                "ms-azuretools.azure-dev",
+                "ms-azuretools.vscode-docker",
+                "GitHub.copilot-chat",
                 "GitHub.copilot",
-                "ms-kubernetes-tools.vscode-kubernetes-tools",
-                "microsoft-aspire.aspire-vscode"
-            ],
-            "settings": {
-                "remote.autoForwardPorts": true,
-                "remote.autoForwardPortsSource": "hybrid",
-                "remote.otherPortsAttributes": {
-                    "onAutoForward": "ignore"
-                },
-                "dotnet.defaultSolution": "Aspire.slnx"
-            }
+                "redhat.vscode-yaml",
+                "eamodio.gitlens"
+            ]
         }
     },
-    "onCreateCommand": "dotnet restore && chmod +x .devcontainer/scripts/*.sh .devcontainer/scripts/lib/*.sh 2>/dev/null || true",
-    "postCreateCommand": "if [ -f .devcontainer/scripts/init-env.sh ]; then bash .devcontainer/scripts/init-env.sh; fi",
-    "postStartCommand": "bash -lc 'if command -v dotnet >/dev/null 2>&1; then echo \"Running dotnet dev-certs\" && dotnet dev-certs https --trust || echo \"dotnet dev-certs failed or returned non-zero\"; else echo \"dotnet not found, skipping dev-certs\"; fi'",
+    // CRITICAL FIX: Use ./restore.sh instead of dotnet restore
+    // The Aspire repo requires running restore.sh first to set up the local SDK
+    "onCreateCommand": "bash -c 'chmod +x .devcontainer/scripts/*.sh .devcontainer/scripts/lib/*.sh 2>/dev/null || true && ./restore.sh'",
+    
+    // Make init-env.sh non-blocking - it should not fail container creation
+    "postCreateCommand": "bash -c 'if [ -f .devcontainer/scripts/init-env.sh ]; then bash .devcontainer/scripts/init-env.sh || true; fi'",
+    
+    // Use the local SDK after restore has completed
+    "postStartCommand": "bash -lc 'if command -v dotnet >/dev/null 2>&1; then echo \"Running dotnet dev-certs\" && dotnet dev-certs https --trust 2>/dev/null || echo \"dotnet dev-certs skipped (requires interactive mode)\"; else echo \"dotnet not found, skipping dev-certs\"; fi'",
+    
     "remoteEnv": {
-        // When the project is built the Aspire.Cli project produces an executable which can be useful to
-        // have on the path for local testing within the devcontainer environment.
-        "PATH": "${containerEnv:PATH}:/workspaces/aspire/artifacts/bin/Aspire.Cli/Debug/net8.0/",
-        "GH_PAT": "${localEnv:GH_PAT}",
-        "GITHUB_OWNER": "${localEnv:GITHUB_OWNER}",
-        "GITHUB_RUNNER_TOKEN": "${localEnv:GITHUB_RUNNER_TOKEN}",
-        "DOCKER_ACCESS_TOKEN": "${localEnv:DOCKER_ACCESS_TOKEN}",
-        "DOCKER_USERNAME": "${localEnv:DOCKER_USERNAME}",
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:4317",
-        "DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS": "true"
-    },
-    "build": {
-        "dockerfile": "Dockerfile",
-        "args": {
-            "devcontainercli": "true"
-        }
+        "DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS": "true",
+        // Add paths to use local SDK after restore
+        "DOTNET_ROOT": "/usr/share/dotnet",
+        "PATH": "${containerEnv:PATH}:/workspaces/aspire/.dotnet:/workspaces/aspire/artifacts/bin/Aspire.Cli/Release/net10.0/linux-x64/publish"
     },
     "runArgs": [
-        "--add-host=host.docker.internal:host-gateway",
         "--cap-add=SYS_PTRACE",
-        "--security-opt=seccomp=unconfined"
+        "--security-opt",
+        "seccomp=unconfined"
+    ],
+    "mounts": [
+        // Mount .env as writable to allow permission changes
+        "source=${localWorkspaceFolder}/.devcontainer/.env,target=/workspaces/aspire/.devcontainer/.env,type=bind,consistency=cached"
     ]
 }
