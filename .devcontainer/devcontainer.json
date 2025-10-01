@@ -117,12 +117,10 @@
             ]
         }
     },
-    // CRITICAL FIX: Make root-level scripts executable FIRST, then run restore.sh
-    // The Aspire repo requires running restore.sh first to set up the local SDK
-    // Must chmod *.sh to include restore.sh, build.sh, etc. in the workspace root
-    "onCreateCommand": "chmod +x *.sh .devcontainer/scripts/*.sh .devcontainer/scripts/lib/*.sh 2>/dev/null || true && bash ./restore.sh",
-    
-    // Make init-env.sh non-blocking - it should not fail container creation
+	// Run commands after the container is created - chmod all scripts and run restore
+	// CRITICAL: Must chmod root-level *.sh files AND scripts directory before running restore
+	// restore.sh sets up the local .NET SDK matching global.json
+	"onCreateCommand": "chmod +x *.sh .devcontainer/scripts/*.sh .devcontainer/scripts/lib/*.sh eng/*.sh eng/**/*.sh 2>/dev/null || true && bash ./restore.sh",    // Make init-env.sh non-blocking - it should not fail container creation
     "postCreateCommand": "if [ -f .devcontainer/scripts/init-env.sh ]; then bash .devcontainer/scripts/init-env.sh || true; fi",
     
     // Only run dev-certs if the local SDK is ready (checks for 10.0 SDK)
