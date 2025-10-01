@@ -351,6 +351,24 @@
             },
             "problemMatcher": [],
             "detail": "Display parsed devcontainer configuration with key settings"
+        },
+        {
+            "label": "DevContainer: Docker Cleanup",
+            "type": "shell",
+            "command": "${workspaceFolder}/.devcontainer/scripts/container/cleanup.sh",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Interactive Docker cleanup utility for removing bloat and orphaned resources"
         }
     ]
 }
