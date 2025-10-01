@@ -42,3 +42,9 @@ if command -v jq &> /dev/null; then
 else
     docker inspect "$container_id"
 fi
+
+echo ""
+echo "--- Quick Commands ---"
+echo "Execute command: devcontainer exec --workspace-folder /projects/aspire <command>"
+echo "Run user commands: devcontainer run-user-commands --workspace-folder /projects/aspire"
+echo "View configuration: devcontainer read-configuration --workspace-folder /projects/aspire"

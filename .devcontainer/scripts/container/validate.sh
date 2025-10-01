@@ -27,7 +27,7 @@ else
         ls -la .devcontainer/ 2>/dev/null || echo "Directory doesn't exist"
         exit 1
     fi
-    
+
     # devcontainer.json uses JSONC (JSON with Comments), so strip comments first
     echo "  (Note: devcontainer.json uses JSONC format - stripping comments for validation)"
     if grep -v '^\s*//' .devcontainer/devcontainer.json | sed 's|//.*$||g' | jq empty 2>&1; then
@@ -36,7 +36,7 @@ else
         echo "⚠ Could not fully validate (comments may interfere)"
         echo "  File appears syntactically correct for VS Code"
     fi
-    
+
     echo ""
     echo "Checking tasks.json syntax..."
     if [ ! -f ".vscode/tasks.json" ]; then
@@ -92,5 +92,17 @@ for script in .devcontainer/scripts/devcontainer-*.sh; do
 done
 
 echo ""
+echo "Testing devcontainer read-configuration..."
+if devcontainer read-configuration --workspace-folder . --log-level error > /dev/null 2>&1; then
+    echo "✓ DevContainer CLI can parse configuration"
+else
+    echo "✗ DevContainer CLI configuration check failed"
+    echo "  Run: devcontainer read-configuration --workspace-folder ."
+fi
+
+echo ""
 echo "=== Configuration appears valid ==="
-echo "Run 'DevContainer: Build and Run with Logs' to test"
+echo "Next steps:"
+echo "  • Build: bash .devcontainer/scripts/container/build.sh"
+echo "  • Rebuild: bash .devcontainer/scripts/container/rebuild.sh"
+echo "  • Check logs: bash .devcontainer/scripts/container/logs.sh"

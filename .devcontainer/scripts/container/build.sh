@@ -1,5 +1,5 @@
 #!/bin/bash
-# devcontainer-build.sh - Build and run devcontainer with logging
+# build.sh - Build and run devcontainer with validation and logging
 
 set -euo pipefail
 
@@ -19,6 +19,17 @@ if ! command -v devcontainer &> /dev/null; then
     echo "Install with: npm install -g @devcontainers/cli"
     exit 1
 fi
+
+# Validate configuration before building
+echo "Validating configuration..."
+if devcontainer read-configuration --workspace-folder . > /dev/null 2>&1; then
+    echo "✓ Configuration valid"
+else
+    echo "✗ Configuration validation failed"
+    echo "Run: bash .devcontainer/scripts/container/validate.sh"
+    exit 1
+fi
+echo ""
 
 # Build the container
 if devcontainer build --workspace-folder . --log-level trace 2>&1 | tee "$BUILD_LOG"; then

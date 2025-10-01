@@ -315,6 +315,42 @@
             },
             "problemMatcher": [],
             "detail": "Inspect the currently running devcontainer (status, logs, configuration)"
+        },
+        {
+            "label": "DevContainer: Execute Command",
+            "type": "shell",
+            "command": "${workspaceFolder}/.devcontainer/scripts/container/exec.sh",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Execute a command in the running devcontainer (prompts for command)"
+        },
+        {
+            "label": "DevContainer: Show Configuration",
+            "type": "shell",
+            "command": "${workspaceFolder}/.devcontainer/scripts/container/config.sh",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Display parsed devcontainer configuration with key settings"
         }
     ]
 }
