@@ -96,7 +96,7 @@
             }
         }
     },
-    "onCreateCommand": "bash .devcontainer/scripts/lifecycle/init-permissions.sh && chmod +x *.sh .devcontainer/scripts/**/*.sh eng/*.sh eng/**/*.sh 2>/dev/null || true && bash .devcontainer/scripts/lifecycle/init-python-cache.sh && bash .devcontainer/scripts/lifecycle/init-cache.sh && bash ./restore.sh && bash .devcontainer/scripts/lifecycle/init-env.sh || true",
+    "onCreateCommand": "bash .devcontainer/scripts/lifecycle/init-permissions.sh && chmod +x *.sh .devcontainer/scripts/**/*.sh eng/*.sh eng/**/*.sh 2>/dev/null || true && bash .devcontainer/scripts/lifecycle/init-python-cache.sh && bash .devcontainer/scripts/lifecycle/init-cache.sh && bash .devcontainer/scripts/lifecycle/init-env.sh || true",
     "postCreateCommand": "bash .devcontainer/scripts/lifecycle/post-create-validation.sh || true",
     "postStartCommand": "bash -lc 'if command -v dotnet >/dev/null 2>&1 && dotnet --list-sdks 2>/dev/null | grep -q \"10.0\"; then dotnet dev-certs https --trust 2>/dev/null || echo \"dev-certs skipped\"; fi'",
     "remoteEnv": {

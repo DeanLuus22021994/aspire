@@ -1,0 +1,48 @@
+# .dockerignore for Aspire devcontainer build
+# Build context is set to parent directory (..), so paths are relative to /projects/aspire
+
+# Exclude everything by default, then allow specific files needed for restore
+*
+
+# Allow files needed for restore at root level
+!global.json
+!NuGet.config
+!Directory.Build.props
+!Directory.Build.targets
+!Directory.Packages.props
+
+# Allow entire eng directory for build scripts and Arcade SDK
+!eng/
+# But exclude build artifacts within eng
+eng/artifacts/
+eng/obj/
+eng/bin/
+eng/.dotnet/
+eng/**/artifacts/
+eng/**/obj/
+eng/**/bin/
+
+# Explicitly exclude large directories that aren't needed for restore
+artifacts/
+artifacts_stage_1/
+.dotnet/
+bin/
+obj/
+**/*.binlog
+.git/
+.github/
+.vscode/
+.vs/
+node_modules/
+src/
+tests/
+playground/
+extension/
+tools/
+docs/
+TestResults/
+*.trx
+*.log
+tmp/
+temp/
+
