@@ -7,7 +7,7 @@ set -euo pipefail
 
 # Determine script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-LIB_DIR="$SCRIPT_DIR/lib"
+LIB_DIR="$SCRIPT_DIR/../lib"
 
 # Source required modules
 source "$LIB_DIR/colors.sh" || exit 0
@@ -21,16 +21,16 @@ readonly ENV_EXAMPLE=".devcontainer/.env.example"
 # Initialize environment
 main() {
     print_info "Initializing devcontainer environment (non-blocking mode)"
-    
+
     # Make scripts executable (best-effort)
     chmod +x .devcontainer/*.sh 2>/dev/null || true
     chmod +x .devcontainer/scripts/*.sh 2>/dev/null || true
     chmod +x .devcontainer/scripts/lib/*.sh 2>/dev/null || true
-    
+
     # Check if .env exists
     if ! file_exists "$ENV_FILE"; then
         print_info "No .env file found at $ENV_FILE"
-        
+
         # Try to create from example
         if file_exists "$ENV_EXAMPLE"; then
             print_info "Creating placeholder .env from .env.example"
@@ -55,11 +55,11 @@ main() {
     # Try to fix permissions (best-effort, expected to fail on bind mounts)
     if file_exists "$ENV_FILE"; then
         print_info "Attempting to secure environment file permissions..."
-        
+
         # These are expected to fail on bind-mounted files - that's OK
         set_container_ownership "$ENV_FILE" 2>/dev/null || print_info "Could not change ownership (likely bind-mounted from host)"
         set_secure_permissions "$ENV_FILE" 2>/dev/null || print_info "Could not set permissions to 600 (likely bind-mounted from host)"
-        
+
         # Try to load if readable
         if file_readable "$ENV_FILE"; then
             print_info "Loading environment variables from $ENV_FILE"
@@ -76,7 +76,7 @@ main() {
     echo "  2. Run: ./build.sh      (to build the project)"
     echo "  3. Run: .devcontainer/scripts/setup-env.sh  (to configure GitHub Actions integration)"
     echo ""
-    
+
     return 0
 }
 

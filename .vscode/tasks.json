@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                ".devcontainer/scripts/setup-env.sh"
+                ".devcontainer/scripts/environment/setup.sh"
             ],
             "group": {
                 "kind": "build",
@@ -31,7 +31,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "if [ ! -f .devcontainer/.env ]; then cp .devcontainer/.env.example .devcontainer/.env && chmod 600 .devcontainer/.env && echo 'Copied .devcontainer/.env.example -> .devcontainer/.env. Edit values then re-run this task.' && exit 1; fi; .devcontainer/scripts/setup-env.sh --from-file .devcontainer/.env"
+                "if [ ! -f .devcontainer/.env ]; then cp .devcontainer/.env.example .devcontainer/.env && chmod 600 .devcontainer/.env && echo 'Copied .devcontainer/.env.example -> .devcontainer/.env. Edit values then re-run this task.' && exit 1; fi; .devcontainer/scripts/environment/setup.sh --from-file .devcontainer/.env"
             ],
             "group": {
                 "kind": "build",
@@ -55,7 +55,7 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                ".devcontainer/scripts/verify-env.sh"
+                ".devcontainer/scripts/environment/verify.sh"
             ],
             "group": "test",
             "presentation": {
@@ -226,7 +226,7 @@
         {
             "label": "DevContainer: Build and Run with Logs",
             "type": "shell",
-            "command": "${workspaceFolder}/.devcontainer/scripts/devcontainer-build.sh",
+            "command": "${workspaceFolder}/.devcontainer/scripts/container/build.sh",
             "group": {
                 "kind": "build",
                 "isDefault": false
@@ -247,7 +247,7 @@
         {
             "label": "DevContainer: Rebuild",
             "type": "shell",
-            "command": "${workspaceFolder}/.devcontainer/scripts/devcontainer-rebuild.sh",
+            "command": "${workspaceFolder}/.devcontainer/scripts/container/rebuild.sh",
             "group": "build",
             "presentation": {
                 "echo": true,
@@ -265,7 +265,7 @@
         {
             "label": "DevContainer: Show Logs",
             "type": "shell",
-            "command": "${workspaceFolder}/.devcontainer/scripts/devcontainer-logs.sh",
+            "command": "${workspaceFolder}/.devcontainer/scripts/container/logs.sh",
             "group": "test",
             "presentation": {
                 "echo": true,
@@ -283,7 +283,7 @@
         {
             "label": "DevContainer: Validate Configuration",
             "type": "shell",
-            "command": "${workspaceFolder}/.devcontainer/scripts/devcontainer-validate.sh",
+            "command": "${workspaceFolder}/.devcontainer/scripts/container/validate.sh",
             "group": "test",
             "presentation": {
                 "echo": true,
@@ -301,7 +301,7 @@
         {
             "label": "DevContainer: Inspect Current Container",
             "type": "shell",
-            "command": "${workspaceFolder}/.devcontainer/scripts/devcontainer-inspect.sh",
+            "command": "${workspaceFolder}/.devcontainer/scripts/container/inspect.sh",
             "group": "test",
             "presentation": {
                 "echo": true,

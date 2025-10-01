@@ -6,7 +6,7 @@ set -euo pipefail
 
 # Determine script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-LIB_DIR="$SCRIPT_DIR/lib"
+LIB_DIR="$SCRIPT_DIR/../lib"
 
 # Source required modules
 source "$LIB_DIR/colors.sh"
@@ -77,15 +77,15 @@ interactive_setup() {
     echo "This script will create a .devcontainer/.env file with sensitive tokens"
     echo "The .env file approach is more secure than storing in ~/.bashrc"
     echo
-    
+
     read -p "Continue with setup? (y/N): " proceed
     if [[ ! "$proceed" =~ ^[Yy]$ ]]; then
         echo "Setup cancelled"
         exit 0
     fi
-    
+
     print_subheader "Enter your environment variables"
-    
+
     # GitHub PAT
     while true; do
         read -p "Enter GH_PAT (GitHub Personal Access Token): " -s GH_PAT_INPUT
@@ -94,7 +94,7 @@ interactive_setup() {
             break
         fi
     done
-    
+
     # GitHub Owner
     while true; do
         read -p "Enter GITHUB_OWNER (username or organization): " GITHUB_OWNER_INPUT
@@ -102,12 +102,12 @@ interactive_setup() {
             break
         fi
     done
-    
+
     # GitHub Runner Token (optional)
     read -p "Enter GITHUB_RUNNER_TOKEN (press Enter to skip): " -s GITHUB_RUNNER_TOKEN_INPUT
     echo
     validate_input_interactive "GITHUB_RUNNER_TOKEN" "$GITHUB_RUNNER_TOKEN_INPUT" false || true
-    
+
     # Docker Access Token
     while true; do
         read -p "Enter DOCKER_ACCESS_TOKEN: " -s DOCKER_ACCESS_TOKEN_INPUT
@@ -116,7 +116,7 @@ interactive_setup() {
             break
         fi
     done
-    
+
     # Docker Username
     while true; do
         read -p "Enter DOCKER_USERNAME: " DOCKER_USERNAME_INPUT
@@ -129,22 +129,22 @@ interactive_setup() {
 # Load variables from file
 load_variables_from_file() {
     local file="$1"
-    
+
     if ! file_exists "$file"; then
         print_error "File not found: $file"
         return 1
     fi
-    
+
     # Export variables from file
     export_env_vars "$file"
-    
+
     # Extract values
     GH_PAT_INPUT="${GH_PAT:-}"
     GITHUB_OWNER_INPUT="${GITHUB_OWNER:-}"
     GITHUB_RUNNER_TOKEN_INPUT="${GITHUB_RUNNER_TOKEN:-}"
     DOCKER_ACCESS_TOKEN_INPUT="${DOCKER_ACCESS_TOKEN:-}"
     DOCKER_USERNAME_INPUT="${DOCKER_USERNAME:-}"
-    
+
     print_success "Loaded variables from $file"
 }
 
@@ -153,17 +153,17 @@ setup_bashrc_integration() {
     if [ "$SKIP_BASHRC" = true ]; then
         return 0
     fi
-    
+
     # Create backup if .bashrc exists
     if file_exists "$HOME/.bashrc"; then
         local backup_file
         backup_file="$BASHRC_BACKUP_PREFIX.$(date +%Y%m%d_%H%M%S)"
-        
+
         if create_backup "$HOME/.bashrc" "$(basename "$backup_file" "$HOME/.bashrc")"; then
             print_success "Created backup: $backup_file"
         fi
     fi
-    
+
     # Add source line if not already present
     if ! grep -q "source.*\.devcontainer/\.env" "$HOME/.bashrc" 2>/dev/null; then
         {
@@ -171,7 +171,7 @@ setup_bashrc_integration() {
             echo "# Source GitHub Actions environment (added by setup-env.sh)"
             echo "[ -f $ENV_FILE ] && set -a && source $ENV_FILE && set +a"
         } >> "$HOME/.bashrc"
-        
+
         print_success "Added source command to ~/.bashrc (tokens stored in .env file)"
     else
         print_info "Source command already in ~/.bashrc"
@@ -182,13 +182,13 @@ setup_bashrc_integration() {
 show_completion_message() {
     echo
     print_header "Environment setup complete!"
-    
+
     echo "Next steps:"
     echo "1. Run 'source $ENV_FILE' to load variables in current session"
     echo "2. Run '.devcontainer/verify-env.sh' to verify setup"
     echo "3. Rebuild container to apply environment variables via --env-file"
     echo
-    
+
     print_subheader "Security Notes"
     echo "- Tokens are stored in $ENV_FILE (not in ~/.bashrc)"
     echo "- File permissions set to 600 (owner read/write only)"
@@ -199,12 +199,12 @@ show_completion_message() {
 # Main setup function
 main() {
     parse_arguments "$@"
-    
+
     print_header "GitHub Actions Runner Environment Setup"
-    
+
     # Create template file
     create_env_template "$ENV_EXAMPLE"
-    
+
     # Get environment variables
     if [ "$NON_INTERACTIVE" = true ]; then
         if is_empty "$FROM_FILE"; then
@@ -215,9 +215,9 @@ main() {
     else
         interactive_setup
     fi
-    
+
     print_subheader "Setting up environment..."
-    
+
     # Write environment file
     if write_env_file "$ENV_FILE" "$GH_PAT_INPUT" "$GITHUB_OWNER_INPUT" "$GITHUB_RUNNER_TOKEN_INPUT" "$DOCKER_ACCESS_TOKEN_INPUT" "$DOCKER_USERNAME_INPUT"; then
         print_success "Environment file created successfully"
@@ -225,13 +225,13 @@ main() {
         print_error "Failed to create environment file"
         exit 1
     fi
-    
+
     # Ensure .gitignore entry
     ensure_gitignore "$ENV_FILE"
-    
+
     # Setup bashrc integration
     setup_bashrc_integration
-    
+
     # Show completion message
     show_completion_message
 }
