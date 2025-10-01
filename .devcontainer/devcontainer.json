@@ -97,7 +97,7 @@
         }
     },
     "onCreateCommand": {
-        "01-permissions": "chmod +x *.sh .devcontainer/scripts/**/*.sh eng/*.sh eng/**/*.sh 2>/dev/null || true",
+        "01-permissions": "chmod +x *.sh .devcontainer/scripts/**/*.sh eng/*.sh eng/**/*.sh 2>/dev/null || true && chown -R vscode:vscode /workspaces/aspire 2>/dev/null || true",
         "02-init-cache": "bash .devcontainer/scripts/lifecycle/init-cache.sh",
         "03-restore": "bash ./restore.sh",
         "04-init-env": "bash .devcontainer/scripts/lifecycle/init-env.sh || true"

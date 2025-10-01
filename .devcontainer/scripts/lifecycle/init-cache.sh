@@ -24,15 +24,18 @@ chown -R vscode:vscode /workspaces/aspire/.dotnet 2>/dev/null || true
 # Create symlinks if workspace .dotnet doesn't have content
 if [ ! -d "/workspaces/aspire/.dotnet/sdk" ] && [ -d "/workspace-cache/.dotnet/sdk" ]; then
     print_info "Linking cached .dotnet SDK to workspace..."
-    rm -rf /workspaces/aspire/.dotnet
-    ln -sf /workspace-cache/.dotnet /workspaces/aspire/.dotnet
-    print_success ".dotnet SDK linked from cache"
+    rm -rf /workspaces/aspire/.dotnet 2>/dev/null || true
+    ln -sf /workspace-cache/.dotnet /workspaces/aspire/.dotnet 2>/dev/null || print_warning "Could not link .dotnet (permissions)"
+    [ -L "/workspaces/aspire/.dotnet" ] && print_success ".dotnet SDK linked from cache"
 fi
 
-# Create symlink for artifacts if cache exists
+# Create symlink for artifacts if cache exists (non-fatal)
 if [ -d "/workspace-cache/artifacts" ] && [ ! -L "/workspaces/aspire/artifacts-cache" ]; then
-    ln -sf /workspace-cache/artifacts /workspaces/aspire/artifacts-cache
-    print_info "Linked artifacts cache"
+    if ln -sf /workspace-cache/artifacts /workspaces/aspire/artifacts-cache 2>/dev/null; then
+        print_info "Linked artifacts cache"
+    else
+        print_warning "Could not link artifacts cache (non-critical, workspace may be read-only)"
+    fi
 fi
 
 # Verify cache setup
