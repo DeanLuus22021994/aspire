@@ -140,8 +140,8 @@ Environment file management
 Executed automatically by DevContainer:
 
 #### 1. `init-permissions.sh` (NEW) ⚡ **CRITICAL FIRST STEP**
-**Purpose**: Ensure correct workspace permissions before any operations  
-**When**: First step in `onCreateCommand`  
+**Purpose**: Ensure correct workspace permissions before any operations
+**When**: First step in `onCreateCommand`
 **Features**:
 - Robust permission fixing with retry logic
 - Waits for write access to critical directories
@@ -149,8 +149,8 @@ Executed automatically by DevContainer:
 - Validates permissions after fixing
 
 #### 2. `init-python-cache.sh`
-**Purpose**: Detect Python cache state and GPU availability  
-**When**: After permissions, before restore  
+**Purpose**: Detect Python cache state and GPU availability
+**When**: After permissions, before restore
 **Features**:
 - GPU detection (NVIDIA, Intel/AMD, none)
 - Python 3.12.11 cache validation
@@ -158,32 +158,32 @@ Executed automatically by DevContainer:
 - Build time estimation
 
 #### 3. `init-cache.sh`
-**Purpose**: Initialize workspace caches (NuGet, artifacts, .dotnet)  
-**When**: After Python cache detection  
+**Purpose**: Initialize workspace caches (NuGet, artifacts, .dotnet)
+**When**: After Python cache detection
 **Features**:
 - Creates cache directories
 - Links to volume mounts
 - Reports cache statistics
 
 #### 4. `restore.sh` (root script)
-**Purpose**: Run .NET restore operation  
-**When**: After cache initialization  
+**Purpose**: Run .NET restore operation
+**When**: After cache initialization
 **Features**:
 - Downloads .NET packages
 - Restores project dependencies
 - Sets up local SDK
 
 #### 5. `init-env.sh`
-**Purpose**: Initialize environment variables  
-**When**: After restore completes  
+**Purpose**: Initialize environment variables
+**When**: After restore completes
 **Features**:
 - Sets up PATH
 - Configures development environment
 - Creates convenience aliases
 
 #### 6. `post-create-validation.sh`
-**Purpose**: Validate container setup  
-**When**: `postCreateCommand` (after onCreateCommand completes)  
+**Purpose**: Validate container setup
+**When**: `postCreateCommand` (after onCreateCommand completes)
 **Features**:
 - Validates .NET SDK installation
 - Checks workspace structure
@@ -322,7 +322,7 @@ graph TD
 
 ### Post Creation (`postCreateCommand`)
 
-```
+```bash
 1. post-create-validation.sh → Validate setup
 ```
 
@@ -344,10 +344,10 @@ graph TD
 4. **Fallback**: Continue with warning if timeout (non-fatal)
 
 ### Benefits
-✅ No arbitrary sleep times  
-✅ Works on fast and slow systems  
-✅ Self-healing (retries automatically)  
-✅ Clear error messages  
+✅ No arbitrary sleep times
+✅ Works on fast and slow systems
+✅ Self-healing (retries automatically)
+✅ Clear error messages
 ✅ Non-blocking (won't hang container creation)
 
 ## Python Caching Architecture
@@ -359,7 +359,7 @@ graph TD
 ### Cache Flow
 
 #### First Build (Cache MISS)
-```
+```bash
 1. init-python-cache.sh → Reports: Cache empty
 2. Python feature installs → Compiles from source (~2 min with GPU)
 3. install-python.sh → Caches binaries
@@ -368,7 +368,7 @@ Total: ~8-10 minutes
 ```
 
 #### Subsequent Build (Cache HIT)
-```
+```bash
 1. init-python-cache.sh → Reports: Cache found
 2. Python feature checks cache → Symlinks existing Python (<1 sec)
 3. install-tools.sh → Restores from cache (<5 sec)
@@ -455,13 +455,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ```
 
-4. **Source required libraries**:
+1. **Source required libraries**:
 ```bash
 source "${SCRIPT_DIR}/../lib/colors.sh"
 source "${SCRIPT_DIR}/../lib/permissions.sh"
 ```
 
-5. **Provide usage information**:
+1. **Provide usage information**:
 ```bash
 usage() {
     echo "Usage: $0 [options]"
@@ -470,12 +470,12 @@ usage() {
 }
 ```
 
-6. **Return proper exit codes**:
+1. **Return proper exit codes**:
    - 0: Success
    - 1: Error (recoverable)
    - 2: Fatal error
 
-7. **Make executable**:
+2. **Make executable**:
 ```bash
 chmod +x new-script.sh
 ```

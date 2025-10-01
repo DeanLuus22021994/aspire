@@ -4,16 +4,16 @@
 # Ensures correct permissions before critical lifecycle operations
 #
 
-set -euo pipefail
+set -eo pipefail
 
 # Script location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIB_DIR="${SCRIPT_DIR}/../lib"
 
-# Source libraries
-source "${LIB_DIR}/colors.sh" 2>/dev/null || {
+# Source libraries (colors first, then define fallbacks)
+if ! source "${LIB_DIR}/colors.sh" 2>/dev/null; then
     RED=''; GREEN=''; YELLOW=''; BLUE=''; CYAN=''; NC=''
-}
+fi
 source "${LIB_DIR}/permissions.sh"
 
 # Configuration

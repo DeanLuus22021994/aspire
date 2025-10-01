@@ -2,7 +2,7 @@
 
 ## Directory Structure
 
-```
+```text
 .devcontainer/scripts/
 ├── container/          # Container management operations
 ├── environment/        # Environment setup and configuration
@@ -66,7 +66,7 @@
 ## Execution Flow
 
 ### Container Creation (onCreateCommand)
-```
+```bash
 1. init-permissions.sh     → Ensure workspace permissions
 2. init-python-cache.sh    → Detect Python cache state
 3. init-cache.sh           → Initialize workspace caches
@@ -75,7 +75,7 @@
 ```
 
 ### Post Creation (postCreateCommand)
-```
+```text
 1. post-create-validation.sh → Validate container setup
 ```
 

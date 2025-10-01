@@ -4,14 +4,14 @@
 # Provides robust permission handling with retry logic and validation
 #
 
-set -euo pipefail
+set -eo pipefail
 
 # Source dependencies
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/colors.sh" 2>/dev/null || {
+if ! source "${SCRIPT_DIR}/colors.sh" 2>/dev/null; then
     # Fallback if colors.sh doesn't exist
     RED=''; GREEN=''; YELLOW=''; BLUE=''; CYAN=''; NC=''
-}
+fi
 
 # Constants
 readonly DEFAULT_MAX_WAIT=10
