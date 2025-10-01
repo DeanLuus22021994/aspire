@@ -1,8 +1,9 @@
-# DevContainer Architecture & Sprint 2 Requirements
-
-Version: 3.0.0
-Last Updated: 2025-09-30
-Status: Implementation Ready with Full Traceability
+---
+title: "DevContainer Architecture & Sprint 2 Requirements"
+version: "3.0.0"
+last_updated: "2025-09-30"
+status: "Implementation Ready with Full Traceability"
+---
 
 ## Document purpose
 This document specifies architecture and implementation requirements for the Aspire devcontainer workstream (Sprint 2 focus). It is implementation-ready and provides traceability to technical debt items, CI workflows, scripts, and verification tests.

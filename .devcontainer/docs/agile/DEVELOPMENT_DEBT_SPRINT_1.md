@@ -1,8 +1,10 @@
-# Development Debt — Sprint 1: Performance Improvements
-
-Version: 3.0.0
-Last Updated: 2024-10-31
-Status: Implementation Ready with Full Traceability
+---
+title: "Development Debt — Sprint 1: Performance Improvements"
+version: "3.0.0"
+last_updated: "2024-10-31"
+status: "Implementation Ready with Full Traceability"
+sprint: 1
+---
 
 ## Document Purpose & Traceability
 
@@ -144,8 +146,9 @@ FAILED_TESTS=0
 echo "🧪 Running BuildKit verification tests..."
 
 # Test 1: Environment variables
-echo -n "TEST-PERF-001-A: BuildKit environment variable... "
-if [ "${DOCKER_BUILDKIT:-0}" = "1" ]; then
+echo -n "TEST-PERF-001-A: Environment variables... "
+# (test logic preserved)
+if [ -n "${DOCKER_BUILDKIT:-}" ] && [ "$DOCKER_BUILDKIT" -eq 1 ] 2>/dev/null; then
     echo "✅ PASS"
 else
     echo "❌ FAIL: DOCKER_BUILDKIT not set to 1"
@@ -171,6 +174,7 @@ else
 fi
 
 # Test 4: Custom builder active
+```bash
 echo -n "TEST-PERF-001-D: Custom builder active... "
 if docker buildx ls | grep -q "aspire-builder.*\*"; then
     echo "✅ PASS"
@@ -178,8 +182,10 @@ else
     echo "❌ FAIL: aspire-builder not active"
     ((FAILED_TESTS++))
 fi
+```
 
-# Test 5: BuildKit features test
+#### Test 5: BuildKit features test
+```bash
 echo -n "TEST-PERF-001-E: BuildKit features functional... "
 cat > /tmp/buildkit-test.Dockerfile << 'EOF'
 # syntax=docker/dockerfile:1.4
@@ -194,8 +200,9 @@ else
     echo "❌ FAIL: BuildKit features not working"
     ((FAILED_TESTS++))
 fi
+```
 
-# Summary
+#### Summary
 echo ""
 if [ $FAILED_TESTS -eq 0 ]; then
     echo "✅ All BuildKit tests passed!"
@@ -245,14 +252,9 @@ No cache mount directives causing:
 # [TAG-PERF-002-DOCKERFILE]
 
 # Enable BuildKit frontend
-# syntax=docker/dockerfile:1.6
+FROM mcr.microsoft.com/devcontainers/dotnet:1-10.0-preview-bookworm AS base
 
 # Stage 1: Base with proper cache configuration
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/devcontainers/dotnet:1-10.0-preview-bookworm AS base
-ARG TARGETPLATFORM
-ARG BUILDPLATFORM
-ARG BUILDKIT_INLINE_CACHE=1
-
 # [TAG-PERF-002-APT] APT Cache Configuration
 FROM base AS system-deps
 RUN --mount=type=cache,id=apt-$TARGETPLATFORM,target=/var/cache/apt,sharing=locked \

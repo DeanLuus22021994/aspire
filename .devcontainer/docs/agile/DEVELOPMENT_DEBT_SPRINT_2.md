@@ -1,7 +1,10 @@
-# DevContainer Development Debt - Sprint 2: CI/CD & Automation
-# Version: 3.0.0
-# Last Updated: 2024-10-31
-# Status: Implementation Ready with Full Traceability
+---
+title: "DevContainer Development Debt - Sprint 2: CI/CD & Automation"
+version: "3.0.0"
+last_updated: "2024-10-31"
+status: "Implementation Ready with Full Traceability"
+sprint: 2
+---
 
 ## Document Purpose & Sprint 2 Scope
 
