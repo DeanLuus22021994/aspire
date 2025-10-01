@@ -94,8 +94,26 @@ _wait_for_write_access() {
     # Create directory if it doesn't exist
     mkdir -p "$dir" 2>/dev/null || true
 
-    # Check if vscode user can write (not just current user)
-    while ! sudo -u vscode test -w "$dir" 2>/dev/null; do
+    # Try to fix permissions immediately
+    if _fix_permissions "$dir" 2>/dev/null; then
+        # Check if vscode user exists (container) or just check world-writable (host)
+        if id vscode &>/dev/null; then
+            # In container: check vscode user can write
+            if sudo -u vscode test -w "$dir" 2>/dev/null; then
+                echo -e "${GREEN}✓ Write access verified (vscode user): ${dir}${NC}"
+                return 0
+            fi
+        else
+            # On host or vscode doesn't exist: check if world-writable
+            if [ -w "$dir" ]; then
+                echo -e "${GREEN}✓ Write access verified: ${dir}${NC}"
+                return 0
+            fi
+        fi
+    fi
+
+    # Retry loop if initial attempt failed
+    while true; do
         if [ $wait_count -ge "$max_wait" ]; then
             echo -e "${YELLOW}⚠ Timeout after ${max_wait}s waiting for: ${dir}${NC}" >&2
             return 1
@@ -105,11 +123,23 @@ _wait_for_write_access() {
         wait_count=$((wait_count + DEFAULT_CHECK_INTERVAL))
 
         # Try to fix permissions again
-        _fix_permissions "$dir" 2>/dev/null || true
-    done
+        if ! _fix_permissions "$dir" 2>/dev/null; then
+            continue
+        fi
 
-    echo -e "${GREEN}✓ Write access verified: ${dir}${NC}"
-    return 0
+        # Check again
+        if id vscode &>/dev/null; then
+            if sudo -u vscode test -w "$dir" 2>/dev/null; then
+                echo -e "${GREEN}✓ Write access verified (vscode user): ${dir}${NC}"
+                return 0
+            fi
+        else
+            if [ -w "$dir" ]; then
+                echo -e "${GREEN}✓ Write access verified: ${dir}${NC}"
+                return 0
+            fi
+        fi
+    done
 }
 
 #
