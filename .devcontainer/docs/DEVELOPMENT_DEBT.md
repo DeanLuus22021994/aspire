@@ -9,6 +9,16 @@ status: "Implementation Ready with Full Traceability"
 
 After exhaustive analysis of the .NET Aspire DevContainer implementation, I've identified **23 critical issues** causing **7+ minute rebuilds**, **2GB+ redundant downloads**, and **zero cache utilization**. This comprehensive report provides **immediately actionable solutions** with **measured performance gains** that will reduce rebuild times to **<30 seconds** and improve developer experience by **10x**.
 
+## Implementation Checklist (high-priority, traceable)
+- [ ] REQ-PERF-001: Enable Docker BuildKit — Owner: DevOps | Acceptance: DOCKER_BUILDKIT=1 in profiles; builder 'aspire-builder' exists
+- [ ] REQ-PERF-002: Layer caching & cache mounts — Owner: DevOps | Acceptance: Dockerfile uses --mount=type=cache for apt/nuget/npm
+- [ ] REQ-PERF-003: Multi-stage Dockerfile optimization — Owner: DevOps | Acceptance: Multi-stage targets used and final image size reduced
+- [ ] REQ-PERF-006: Registry build-cache workflow — Owner: DevOps | Acceptance: `cache-*` tags published (see `.devcontainer/docs/TODO.md`)
+- [ ] REQ-PERF-007: Persistent volumes & volumes manager — Owner: DevOps | Acceptance: `manage-volumes.sh create` and `verify-volumes.sh` pass
+- [ ] REQ-SEC-001: Secure .env handling — Owner: Dev | Acceptance: `.devcontainer/.env` created w/ 0600; verify script non-echoing
+
+Please use `.devcontainer/docs/TODO.md` for granular task tracking and PR links.
+
 ## 🔴 Critical Performance Crisis: Immediate Actions Required
 
 ### 1. **Build Performance: From 7+ Minutes to <30 Seconds**
